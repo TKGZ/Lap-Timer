@@ -1,96 +1,49 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Vibration } from 'react-native';
+
+import * as helpers from '../../helpers/helpers';
 
 
 export default function TimeBox() {
 
+    const [currentInterval, setCurrentInterval] = useState();
 
 
-    const [previousLap, setPreviousLap] = useState(0);
-    const [seconds, setSeconds] = useState(0);
-    const [displayedSeconds, setDisplayedSeconds] = useState(0);
+    const [startTime, setStartTime] = useState(0);
+    const [elapsedTime, setElapsedTime] = useState(0);
 
-    const [color, setColor] = useState('#95a5a6')
+    //time in miliseconds
+    const [time, setTime] = useState(1);
+    const [previousTime, setPreviousTime] = useState(0);
+    const [displayedTime, setDisplayedTime] = useState(0);
+    
+    const [color, setColor] = useState('#95a5a6');
+    const [delay, setDelay] = useState(10);
 
 
+    var currentTime = new Date().getTime();
+
+    //store more accurate information!
+    useInterval(() => {
+        setElapsedTime(currentTime - startTime);
+    }, delay);
+    
+    //display less accurate information (less updates!)
+    useInterval(() => {
+        setDisplayedTime((elapsedTime - (elapsedTime % 1000))/1000)
+    }, 100);
+    
     function restartTimer()
     {
-        setPreviousLap(seconds);
-        setSeconds(0);
-        Vibration.vibrate([100,100,50,50]);
-
+        setStartTime(currentTime);
     }
 
-    useEffect(()=>{
-        var interval = setInterval(() => {
-            setSeconds(seconds + 1);
-            clearInterval(this);
+    useEffect(() => {
+    }, [elapsedTime])
 
-            if (seconds < 2)
-            {
-                setColor(getColor(previousLap));
-                setDisplayedSeconds(previousLap);
-            }
-            else if (seconds < 99)
-            {
-                setColor(getColor(seconds));
-                setDisplayedSeconds(seconds);
-            }
-            else
-            {
-                setDisplayedSeconds(99);
-            }
-        }, 1000);
-        return() => clearInterval(interval);
-    }, [seconds]);
-
-    function getColor(time)
-    {
-        if (time < 20)
-        {
-            if (time % 2 == 0)
-                return ("#ecf0f1");
-            return ("#bdc3c7");
-        }
-        else if (time < 25)
-        {
-            return("#27ae60");
-        }
-        else if (time < 30)
-        {
-            return ("#2ecc71");
-        }
-        else if (time < 35)
-        {
-            return ("#c0392b");
-        }
-        else if (time < 40)
-        {
-            return ("#e74c3c");
-        }
-        else if (time < 45)
-        {
-            return ("#2980b9")
-        }
-        else if (time < 50)
-        {
-            return("#3498db");
-        }
-        else if (time < 55)
-        {
-            return("#f39c12");
-        }
-        else if (time < 60)
-        {
-            return ("#f1c40f");
-        }
-        else
-        {
-            if (time % 2 == 0)
-                return ("#ecf0f1");
-            return ("#bdc3c7");
-        }
-    }
+    useEffect(() => {
+        setStartTime(currentTime);
+    },[])
 
     var mainStyle = {
         backgroundColor: color,
@@ -100,13 +53,32 @@ export default function TimeBox() {
     }
 
     var timeStyle = {
-        fontSize: 200,
+        fontSize: 100,
     }
 
     return (
         <TouchableOpacity style={mainStyle} onPress={restartTimer}>
-            <Text style={timeStyle}>{displayedSeconds}</Text>
+            <Text style={timeStyle}>{displayedTime}</Text>
         </TouchableOpacity>
-
     );
 }
+
+function useInterval(callback, delay) {
+    const savedCallback = useRef();
+  
+    // Remember the latest callback.
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+  
+    // Set up the interval.
+    useEffect(() => {
+      function tick() {
+        savedCallback.current();
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
