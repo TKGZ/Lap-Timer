@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Vibration } from 'react-native';
 
+
 export default function TimeBox() {
 
 
@@ -30,14 +31,14 @@ export default function TimeBox() {
                 setColor(getColor(previousLap));
                 setDisplayedSeconds(previousLap);
             }
-            else if (seconds < 120)
+            else if (seconds < 99)
             {
                 setColor(getColor(seconds));
                 setDisplayedSeconds(seconds);
             }
             else
             {
-                displayedSeconds = "120+";
+                setDisplayedSeconds(99);
             }
         }, 1000);
         return() => clearInterval(interval);
@@ -99,7 +100,7 @@ export default function TimeBox() {
     }
 
     var timeStyle = {
-        fontSize: 250,
+        fontSize: 200,
     }
 
     return (
